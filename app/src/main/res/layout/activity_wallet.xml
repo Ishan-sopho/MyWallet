@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_wallet"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="twitu.mywallet.wallet">
+
+    <LinearLayout
+        android:layout_marginTop="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="70dp">
+        <TextView
+            android:textStyle="bold"
+            android:background="@color/grey"
+            android:textColor="@color/black"
+            android:text="CASH:  "
+            android:gravity="right|center"
+            android:textSize="22sp"
+            android:layout_gravity="center"
+            android:layout_width="0dp"
+            android:layout_weight="0.35"
+            android:layout_height="70dp" />
+
+        <TextView
+            android:textStyle="bold"
+            android:background="@color/grey"
+            android:textColor="@color/black"
+            android:gravity="left|center"
+            android:textSize="22sp"
+            android:id="@+id/cash"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="70dp" />
+
+
+    </LinearLayout>
+
+
+
+    <EditText
+        android:maxLength="8"
+        android:textAlignment="center"
+        android:inputType="number"
+        android:layout_marginTop="15dp"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:id="@+id/amount"
+        android:background="@color/light"
+        android:layout_gravity="center"
+        android:layout_width="150dp"
+        android:layout_height="50dp" />
+
+    <EditText
+        android:gravity="left|top"
+        android:background="@color/light"
+        android:textSize="18sp"
+        android:id="@+id/info"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:layout_width="280dp"
+        android:layout_height="100dp" />
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="match_parent"/>
+        <Button
+            android:background="@color/red"
+            android:id="@+id/pay"
+            android:text="PAY"
+            android:layout_marginRight="10dp"
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="50dp" />
+
+        <Button
+            android:background="@color/green"
+            android:id="@+id/receive"
+            android:text="receive"
+            android:layout_marginLeft="10dp"
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="50dp" />
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+</LinearLayout>
