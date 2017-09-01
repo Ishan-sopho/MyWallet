@@ -21,12 +21,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +66,7 @@ public class wallet extends AppCompatActivity {
     };
 
     private SQLiteDatabase walletDb;
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +77,10 @@ public class wallet extends AppCompatActivity {
         toolbar.setTitle("MyWallet");
         setSupportActionBar(toolbar);
 
+        listView=(ListView)findViewById(R.id.listView);
+        View v=((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.recent_transaction_view,null,false);
+        listView.addHeaderView(v);
+
         walletDb = dbhelper.getWritableDatabase();
         final TextView display = (TextView) findViewById(R.id.cash);
         Button pay = (Button) findViewById(R.id.pay);
@@ -79,6 +88,7 @@ public class wallet extends AppCompatActivity {
         final EditText info = (EditText) findViewById(R.id.info);
         final EditText amount = (EditText) findViewById(R.id.amount);
 
+        populateRecentsList();
          flag= getSharedPreferences("flag", Context.MODE_PRIVATE);
 //        SharedPreferences flag= PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor flagEditor = flag.edit();
@@ -102,6 +112,7 @@ public class wallet extends AppCompatActivity {
                 newvalues.put(transaction.COLUMN_TRANSACTION_TYPE, "pay");
                 newvalues.put(transaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(transactionAmount));
                 long newRowID = walletDb.insert(transaction.TABLE_NAME, null, newvalues);
+                populateRecentsList();
                 Log.d("TAG", "new row id: " + newRowID);
                 flagEditor.putString("lastRow", String.valueOf(newRowID));
                 flagEditor.apply();
@@ -121,6 +132,7 @@ public class wallet extends AppCompatActivity {
                 newvalues.put(transaction.COLUMN_TRANSACTION_TYPE, "receive");
                 newvalues.put(transaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(transactionAmount));
                 long newRowID = walletDb.insert(transaction.TABLE_NAME, null, newvalues);
+                populateRecentsList();
                 flagEditor.putString("lastRow", String.valueOf(newRowID));
                 flagEditor.apply();
                 Log.d("TAG", "new row id: " + newRowID);
@@ -129,6 +141,27 @@ public class wallet extends AppCompatActivity {
         });
     }
 
+    private void populateRecentsList(){
+        SQLiteDatabase recentsDb=dbhelper.getReadableDatabase();
+        Cursor cursor1=recentsDb.rawQuery("SELECT * FROM moneyTransaction order by "+transaction._ID+" DESC limit 3",null);
+        while(cursor1.moveToNext()){
+            Log.d("TAG","row id: "+cursor1.getString(cursor1.getColumnIndexOrThrow(transaction._ID)));
+        }
+        RecentTransactionsAdapter adapter =new RecentTransactionsAdapter(this,cursor1);
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
+//        recentsDb.close();
+        if(cursor1.isLast())
+            cursor1.close();
+
+
+    }
     private void updateDisplay(TextView display,long rowId) {
         SQLiteDatabase data = dbhelper.getReadableDatabase();
         Cursor cursor=data.rawQuery("SELECT * FROM moneyTransaction WHERE "+transaction._ID+" = "+String.valueOf(rowId),null);

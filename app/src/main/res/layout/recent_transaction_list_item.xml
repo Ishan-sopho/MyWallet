@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+    <TextView
+        android:id="@+id/amountTextView"
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:layout_height="40dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:text="Amount: "/>
+
+        <TextView
+            android:id="@+id/balanceTextView"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="40dp"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:text="Balance: "/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+    <TextView
+        android:layout_marginTop="4dp"
+        android:id="@+id/descriptionTextView"
+        android:layout_width="0dp"
+        android:layout_weight="0.5"
+        android:textSize="16sp"
+        android:text="Description:\n"
+        android:layout_height="match_parent" />
+        <TextView
+            android:text="Time: "
+            android:textSize="16sp"
+            android:layout_width="0dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:layout_height="match_parent" />
+        <TextView
+            android:layout_width="0dp"
+            android:textSize="16sp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:id="@+id/timeAdded"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>
