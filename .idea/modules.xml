@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MyWallet.iml" filepath="$PROJECT_DIR$/MyWallet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MyWallet.iml" filepath="$PROJECT_DIR$/MyWallet.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/opencsv-3.9/opencsv-3.9.iml" filepath="$PROJECT_DIR$/opencsv-3.9/opencsv-3.9.iml" />
     </modules>
   </component>
 </project>
