@@ -17,15 +17,6 @@
         android:textStyle="bold"
         android:text="Amount: "/>
 
-        <TextView
-            android:id="@+id/balanceTextView"
-            android:layout_width="0dp"
-            android:layout_weight="0.5"
-            android:layout_height="40dp"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:text="Balance: "/>
     </LinearLayout>
 
     <LinearLayout

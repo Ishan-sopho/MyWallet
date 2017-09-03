@@ -37,7 +37,6 @@ public class RecentTransactionsAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         TextView amountTextView= (TextView) view.findViewById(R.id.amountTextView);
-        TextView balanceTextView=(TextView)view.findViewById(R.id.balanceTextView);
         TextView descriptionTextView=(TextView)view.findViewById(R.id.descriptionTextView);
         TextView timeTextView=(TextView)view.findViewById(R.id.timeAdded);
 
@@ -45,9 +44,13 @@ public class RecentTransactionsAdapter extends CursorAdapter {
         String balance=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_BALANCE));
         String description=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_DESCRIPTION));
         String time=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TIME));
+        String transactionType=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TYPE));
 
-        amountTextView.setText("Amount: "+amount);
-        balanceTextView.setText("Balance: "+balance);
+        if(transactionType.matches("pay")) {
+            amountTextView.setText("Paid: " + amount);
+        }else if(transactionType.matches("receive")){
+            amountTextView.setText("Received: " + amount);
+        }
         timeTextView.setText("Time: "+convertTimeStampToDate(time));
         if(description!=null)
             descriptionTextView.setText("Description: "+description);
