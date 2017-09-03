@@ -47,9 +47,9 @@ public class RecentTransactionsAdapter extends CursorAdapter {
         String transactionType=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TYPE));
 
         if(transactionType.matches("pay")) {
-            amountTextView.setText("Paid: " + amount);
+            amountTextView.setText("Paid: Rs." + amount);
         }else if(transactionType.matches("receive")){
-            amountTextView.setText("Received: " + amount);
+            amountTextView.setText("Received: Rs." + amount);
         }
         timeTextView.setText("Time: "+convertTimeStampToDate(time));
         if(description!=null)

@@ -6,4 +6,10 @@
       android:id="@+id/export"
       android:title="Export to csv"
       app:showAsAction="never"/>
+    <item
+        android:id="@+id/deleteWallet"
+        android:title="delete wallet"
+        app:showAsAction="never"
+        />
+
 </menu>

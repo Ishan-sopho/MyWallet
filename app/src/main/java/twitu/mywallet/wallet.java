@@ -1,8 +1,10 @@
 package twitu.mywallet;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -187,9 +189,41 @@ public class wallet extends AppCompatActivity {
                 if(checkExternalStoragePermission(this))
                     exportToCSV();
                 return true;
+            case R.id.deleteWallet :
+                deleteCurrentWallet();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void deleteCurrentWallet(){
+//        String dbpath=getDatabasePath("moneyTransaction.db").getPath();
+//        final SQLiteDatabase db=SQLiteDatabase.openDatabase(dbpath,null,Context.MODE_PRIVATE);
+        final SQLiteDatabase db=dbhelper.getWritableDatabase();
+        AlertDialog.Builder builder=new AlertDialog.Builder(wallet.this);
+        builder.setMessage("Are you sure you want to delete this wallet ?");
+        builder.setCancelable(false);
+        builder.setPositiveButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+//                finish();
+                dialogInterface.dismiss();
+            }
+        }).setNegativeButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dbhelper.delete(db);
+                SharedPreferences.Editor editor=flag.edit();
+                editor.putString("walletInitialize","False");
+                editor.apply();
+                Intent intent=new Intent(wallet.this,MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+        AlertDialog alert=builder.create();
+        alert.show();
     }
 
     public boolean checkExternalStoragePermission(Activity activity) {
