@@ -28,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
@@ -91,7 +92,7 @@ public class wallet extends AppCompatActivity {
         final EditText amount = (EditText) findViewById(R.id.amount);
 
         populateRecentsList();
-         flag= getSharedPreferences("flag", Context.MODE_PRIVATE);
+        flag= getSharedPreferences("flag", Context.MODE_PRIVATE);
 //        SharedPreferences flag= PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor flagEditor = flag.edit();
 
@@ -101,8 +102,15 @@ public class wallet extends AppCompatActivity {
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int current = Integer.parseInt((String) display.getText());
-                int transactionAmount = Integer.parseInt(amount.getText().toString());
+                int current=0;
+                int transactionAmount=0;
+                try {
+                    current= Integer.parseInt((String) display.getText());
+                    transactionAmount = Integer.parseInt(amount.getText().toString());
+                }catch(Exception e){
+                    Toast.makeText(wallet.this, "Please put in valid input !", Toast.LENGTH_SHORT).show();
+                    return ;
+                }
                 ContentValues newvalues = new ContentValues();
                 if (transactionAmount > current){
                     Toast.makeText(wallet.this, "You do not have the required cash", Toast.LENGTH_SHORT).show();
@@ -119,14 +127,25 @@ public class wallet extends AppCompatActivity {
                 flagEditor.putString("lastRow", String.valueOf(newRowID));
                 flagEditor.apply();
                 updateDisplay(display, newRowID);
+                info.setText("");
+                amount.setText("");
+                hideKeyboard(wallet.this);
             }
         });
 
         receive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int current = Integer.parseInt((String) display.getText());
-                int transactionAmount = Integer.parseInt(amount.getText().toString());
+                int current=0;
+                int transactionAmount=0;
+                try{
+                    current = Integer.parseInt((String) display.getText());
+                    transactionAmount = Integer.parseInt(amount.getText().toString());
+                }catch(Exception e){
+                    Toast.makeText(wallet.this, "Please put in valid input!", Toast.LENGTH_SHORT).show();
+                    return ;
+                }
+
                 ContentValues newvalues = new ContentValues();
                 newvalues.put(transaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(current + transactionAmount));
                 newvalues.put(transaction.COLUMN_TRANSACTION_DESCRIPTION, info.getText().toString());
@@ -139,6 +158,9 @@ public class wallet extends AppCompatActivity {
                 flagEditor.apply();
                 Log.d("TAG", "new row id: " + newRowID);
                 updateDisplay(display, newRowID);
+                info.setText("");
+                amount.setText("");
+                hideKeyboard(wallet.this);
             }
         });
     }
@@ -274,7 +296,7 @@ public class wallet extends AppCompatActivity {
             String balance=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_BALANCE));
             String description=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_DESCRIPTION));
 //            Log.d("TAG","Transaction detected !");
-                data.add(new String[]{convertTimeStampToDate(timeStamp),transactionType,amount,balance,description});
+            data.add(new String[]{convertTimeStampToDate(timeStamp),transactionType,amount,balance,description});
         }
         if (writer != null) {
             writer.writeAll(data);
@@ -305,5 +327,17 @@ public class wallet extends AppCompatActivity {
         String result = objFormatter.format(objCalendar.getTime());
         objCalendar.clear();
         return result;
+    }
+
+    public static void hideKeyboard(Activity activity){
+
+        InputMethodManager inputMethodManager= (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        View v= activity.getCurrentFocus();
+
+        if(v==null){
+            v= new View (activity);
+        }
+        inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(),0);
     }
 }

@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Intent next = new Intent(MainActivity.this, wallet.class);
                     next.putExtra("balance", balance.getText().toString().trim());
-                    next.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                    next.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     flagEditor.putString("walletInitialize", "True");
                     flagEditor.apply();
                     startActivity(next);
