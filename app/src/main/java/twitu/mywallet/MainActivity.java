@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         flag=getSharedPreferences("flag", Context.MODE_PRIVATE);
         if (flag.getString("walletInitialize", "False").matches("True")){
             Intent next = new Intent(MainActivity.this, wallet.class);
+            next.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(next);
         }
         else {

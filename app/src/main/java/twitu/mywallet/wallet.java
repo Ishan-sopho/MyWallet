@@ -68,6 +68,8 @@ public class wallet extends AppCompatActivity {
             WRITE_EXTERNAL_STORAGE
     };
 
+    private String lastRowID;
+
     private SQLiteDatabase walletDb;
     private ListView listView;
 
@@ -166,11 +168,15 @@ public class wallet extends AppCompatActivity {
     }
 
     private void populateRecentsList(){
-        SQLiteDatabase recentsDb=dbhelper.getReadableDatabase();
+        final SQLiteDatabase recentsDb=dbhelper.getReadableDatabase();
         Cursor cursor1=recentsDb.rawQuery("SELECT * FROM moneyTransaction order by "+transaction._ID+" DESC limit 3",null);
-        while(cursor1.moveToNext()){
+        cursor1.moveToNext();
+        lastRowID= cursor1.getString(cursor1.getColumnIndexOrThrow(transaction._ID));
+        while(cursor1.isLast()){
             Log.d("TAG","row id: "+cursor1.getString(cursor1.getColumnIndexOrThrow(transaction._ID)));
+            cursor1.moveToNext();
         }
+
         RecentTransactionsAdapter adapter =new RecentTransactionsAdapter(this,cursor1);
 
         listView.setAdapter(adapter);
@@ -179,6 +185,43 @@ public class wallet extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
             }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, final long id) {
+                if(position==1) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(wallet.this);
+                    builder.setMessage("Do you want to remove this transaction ?");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String idToBeDeleted = String.valueOf(Integer.parseInt(lastRowID));
+                            Log.d("TAG", "Row to be deleted: " + idToBeDeleted);
+                            String tableName = "moneyTransaction";
+                            String whereClause = transaction._ID + "=?";
+                            String[] whereArgs = new String[]{idToBeDeleted};
+                            int deleteID = recentsDb.delete(tableName, whereClause, whereArgs);
+                            Log.d("TAG", "Delete id= " + deleteID);
+                            populateRecentsList();
+                            lastRowID = String.valueOf(Integer.parseInt(lastRowID) - 1);
+                        }
+                    });
+                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.create().show();
+
+                }else if (position!=1){
+                    Toast.makeText(wallet.this, "Can only delete last transaction!", Toast.LENGTH_SHORT).show();
+                }
+
+                return false;
+            };
         });
 //        recentsDb.close();
         if(cursor1.isLast())
