@@ -287,7 +287,9 @@ public class wallet extends AppCompatActivity {
         cursor.moveToNext();
         String currentBalance = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
         Log.d("TAG", "Current Balance: " + currentBalance);
-        display.setText(currentBalance);
+        display.setText("Rs. "+currentBalance);
+        cursor.close();
+//        data.close();
     }
 
     @Override
