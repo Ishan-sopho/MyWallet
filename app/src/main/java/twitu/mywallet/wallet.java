@@ -72,6 +72,7 @@ public class wallet extends AppCompatActivity {
 
     private Spinner walletsSpinner;
     private TextView display ;
+    private ArrayAdapter<String> spinnerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +95,7 @@ public class wallet extends AppCompatActivity {
 
         List<String> walletsNameList = updateSpinner();
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, walletsNameList);
+        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, walletsNameList);
 
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         walletsSpinner.setAdapter(spinnerAdapter);
@@ -282,12 +283,12 @@ public class wallet extends AppCompatActivity {
     }
 
     private void updateDisplay(TextView display, long rowId) {
-        SQLiteDatabase data = transactionDbhelper.getReadableDatabase();
-        Cursor cursor = data.rawQuery("SELECT * FROM moneyTransaction WHERE " + walletTransaction._ID + " = " + String.valueOf(rowId), null);
+//        SQLiteDatabase data = transactionDbhelper.getReadableDatabase();
+        Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE " + walletTransaction._ID + " = " + String.valueOf(rowId), null);
         cursor.moveToNext();
         String currentBalance = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
         Log.d("TAG", "Current Balance: " + currentBalance);
-        display.setText("Rs. "+currentBalance);
+        display.setText(currentBalance);
         cursor.close();
 //        data.close();
     }
@@ -296,7 +297,6 @@ public class wallet extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
-
         return true;
     }
 
@@ -312,13 +312,29 @@ public class wallet extends AppCompatActivity {
                 deleteCurrentWallet();
                 return true;
             case R.id.createWallet:
+                if(!walletsSpinner.getSelectedItem().toString().matches("Wallet")){
+                    Toast.makeText(this, "Can't create subwallet of this wallet currently", Toast.LENGTH_SHORT).show();
+                }
                 Intent intent = new Intent(wallet.this,CreateWallet.class);
                 intent.putExtra("currentBalance",display.getText().toString());
                 startActivity(intent);
                 return true;
+            case R.id.mergeWallet:
+                mergeWallet();
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+//        menu.add(1,3,Menu.NONE,"Merge Wallet");
+        if(walletsSpinner.getSelectedItem().toString().matches("Wallet")){
+            menu.getItem(3).setEnabled(false);
+        }else{
+            menu.getItem(3).setEnabled(true);
+        }
+        return true;
     }
 
     private void deleteCurrentWallet() {
@@ -472,5 +488,56 @@ public class wallet extends AppCompatActivity {
         populateRecentsList();
     }
 
+    public void mergeWallet(){
+        Long currentBalance= Long.parseLong(display.getText().toString());
+        ContentValues newvalues = new ContentValues();
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(0));
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, walletsSpinner.getSelectedItem().toString()+" paid to Wallet");
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_TYPE, "pay");
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,walletsSpinner.getSelectedItem().toString());
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_AMOUNT, display.getText().toString());
+        walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues);
+
+        Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction.COLUMN_TRANSACTION_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'"+" ORDER BY _id DESC LIMIT 1",null);
+        cursor.moveToNext();
+        String currentMainBalance = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
+
+        cursor.close();
+
+        ContentValues newvalues1 = new ContentValues();
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(currentBalance+currentMainBalance));
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, "Received from "+walletsSpinner.getSelectedItem().toString());
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,"Wallet");
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_AMOUNT,currentBalance);
+        walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues1);
+
+        SQLiteDatabase walletsDb = walletsDbHelper.getWritableDatabase();
+        walletsDb.delete(transaction.wallets.TABLE_NAME,transaction.wallets.COLUMN_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'",null);
+        walletsDb.close();
+
+        List<String> walletsNameList = updateSpinner();
+
+        spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, walletsNameList);
+
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        walletsSpinner.setAdapter(spinnerAdapter);
+        walletsSpinner.setSelection(0);
+        walletsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                spinnerOnItemClick(parent, view, position, id,display);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
 }
 

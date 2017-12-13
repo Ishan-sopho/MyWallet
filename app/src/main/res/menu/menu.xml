@@ -16,4 +16,10 @@
     android:id="@+id/createWallet"
     android:title="Create subwallet"
     app:showAsAction="never"/>
+
+  <item
+      android:id="@+id/mergeWallet"
+      android:title="Merge subwallet"
+      app:showAsAction="never"/>
+
 </menu>
