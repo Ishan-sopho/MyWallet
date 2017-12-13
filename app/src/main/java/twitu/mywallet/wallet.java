@@ -9,13 +9,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
@@ -31,7 +27,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,16 +34,12 @@ import android.widget.Toast;
 
 import com.opencsv.CSVWriter;
 
-import org.w3c.dom.Text;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -59,7 +50,7 @@ import twitu.mywallet.transaction.walletTransaction;
 
 public class wallet extends AppCompatActivity {
 
-    Dbhelper dbhelper = new Dbhelper(this);
+    TransactionDbhelper transactionDbhelper = new TransactionDbhelper(this);
     private Toolbar toolbar;
     private SharedPreferences flag;
     public static final int REQUEST_EXTERNAL_PERMISSION_CODE = 666;
@@ -87,7 +78,7 @@ public class wallet extends AppCompatActivity {
         View v=((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.recent_transaction_view,null,false);
         listView.addHeaderView(v);
 
-        walletDb = dbhelper.getWritableDatabase();
+        walletDb = transactionDbhelper.getWritableDatabase();
         final TextView display = (TextView) findViewById(R.id.cash);
         Button pay = (Button) findViewById(R.id.pay);
         Button receive = (Button) findViewById(R.id.receive);
@@ -169,7 +160,7 @@ public class wallet extends AppCompatActivity {
     }
 
     private void populateRecentsList(){
-        final SQLiteDatabase recentsDb=dbhelper.getReadableDatabase();
+        final SQLiteDatabase recentsDb= transactionDbhelper.getReadableDatabase();
         Cursor cursor1=recentsDb.rawQuery("SELECT * FROM moneyTransaction order by "+walletTransaction._ID+" DESC limit 3",null);
         cursor1.moveToNext();
         lastRowID= cursor1.getString(cursor1.getColumnIndexOrThrow(walletTransaction._ID));
@@ -231,7 +222,7 @@ public class wallet extends AppCompatActivity {
 
     }
     private void updateDisplay(TextView display,long rowId) {
-        SQLiteDatabase data = dbhelper.getReadableDatabase();
+        SQLiteDatabase data = transactionDbhelper.getReadableDatabase();
         Cursor cursor=data.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction._ID+" = "+String.valueOf(rowId),null);
         cursor.moveToNext();
         String currentBalance=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
@@ -266,7 +257,7 @@ public class wallet extends AppCompatActivity {
     private void deleteCurrentWallet(){
 //        String dbpath=getDatabasePath("moneyTransaction.db").getPath();
 //        final SQLiteDatabase db=SQLiteDatabase.openDatabase(dbpath,null,Context.MODE_PRIVATE);
-        final SQLiteDatabase db=dbhelper.getWritableDatabase();
+        final SQLiteDatabase db= transactionDbhelper.getWritableDatabase();
         AlertDialog.Builder builder=new AlertDialog.Builder(wallet.this);
         builder.setMessage("Are you sure you want to delete this wallet ?");
         builder.setCancelable(false);
@@ -279,7 +270,7 @@ public class wallet extends AppCompatActivity {
         }).setNegativeButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                dbhelper.delete(db);
+                transactionDbhelper.delete(db);
                 SharedPreferences.Editor editor=flag.edit();
                 editor.putString("walletInitialize","False");
                 editor.apply();
@@ -320,7 +311,7 @@ public class wallet extends AppCompatActivity {
 
     private void exportToCSV(){
         Log.d("TAG","Inside export to CSV");
-        SQLiteDatabase db=dbhelper.getReadableDatabase();
+        SQLiteDatabase db= transactionDbhelper.getReadableDatabase();
         Cursor cursor=db.rawQuery("SELECT * from moneyTransaction",null);
         String rowID=flag.getString("lastRow",null);
         int numberOfRows=Integer.valueOf(rowID);

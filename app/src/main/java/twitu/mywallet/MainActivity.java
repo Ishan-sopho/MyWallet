@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,13 +12,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import twitu.mywallet.transaction.walletTransaction;
+import twitu.mywallet.transaction.wallets;
 
 public class MainActivity extends AppCompatActivity {
     SharedPreferences flag ;
+    private WalletsDbHelper walletsDbHelper;
+    private SQLiteDatabase walletsDb;
 //    SharedPreferences flag = PreferenceManager.getDefaultSharedPreferences(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        walletsDbHelper=new WalletsDbHelper(MainActivity.this);
+        walletsDb=walletsDbHelper.getWritableDatabase();
         flag=getSharedPreferences("flag", Context.MODE_PRIVATE);
         if (flag.getString("walletInitialize", "False").matches("True")){
             Intent next = new Intent(MainActivity.this, wallet.class);
@@ -35,14 +39,23 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     final String initial = balance.getText().toString();
-                    Dbhelper dbhelper = new Dbhelper(MainActivity.this);
-                    final SQLiteDatabase walletDb = dbhelper.getWritableDatabase();
+                    ContentValues contentValues= new ContentValues();
+                    contentValues.put(wallets.COLUMN_WALLET_NAME,"Wallet");
+                    contentValues.put(wallets.COLUMN_WALLET_PARENT_NAME,"Wallet");
+                    long rowID=walletsDb.insertWithOnConflict(wallets.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_ROLLBACK);
+                    Log.d("TAG","new root wallet created with rowID: "+rowID);
+                    walletsDb.close();
+                    TransactionDbhelper transactionDbhelper = new TransactionDbhelper(MainActivity.this);
 
-                    final ContentValues values = new ContentValues();
+                    SQLiteDatabase walletDb = transactionDbhelper.getWritableDatabase();
+
+                    ContentValues values = new ContentValues();
                     values.put(walletTransaction.COLUMN_TRANSACTION_BALANCE, initial);
                     values.put(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, "Initialized wallet");
                     values.put(walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
                     values.put(walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,"Wallet");
                     values.put(walletTransaction.COLUMN_TRANSACTION_AMOUNT, initial);
                     Log.d("TAG", "value :" + values);
                     long newRowID = walletDb.insert(walletTransaction.TABLE_NAME, null, values);

@@ -12,4 +12,8 @@
         app:showAsAction="never"
         />
 
+  <item
+    android:id="@+id/createWallet"
+    android:title="Create subwallet"
+    app:showAsAction="never"/>
 </menu>

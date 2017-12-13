@@ -24,17 +24,13 @@
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="70dp">
-        <TextView
-            android:textStyle="bold"
-            android:background="@color/grey"
-            android:textColor="@color/black"
-            android:text="CASH:  "
-            android:gravity="right|center"
-            android:textSize="22sp"
-            android:layout_gravity="center"
+
+
+        <Spinner
+            android:id="@+id/walletsNameSpinner"
             android:layout_width="0dp"
-            android:layout_weight="0.35"
-            android:layout_height="70dp" />
+            android:layout_height="70dp"
+            android:layout_weight="0.35"/>
 
         <TextView
             android:textStyle="bold"

@@ -20,6 +20,8 @@ public final class transaction {
         public static final String COLUMN_TRANSACTION_BALANCE = "balance";
         public static final String COLUMN_TRANSACTION_TIME = "time";
         public static final String COLUMN_TRANSACTION_DESCRIPTION = "description";
+        public static final String COLUMN_TRANSACTION_WALLET_NAME = "walletName";
+        public static final String COLUMN_TRANSACTION_PARENT_WALLET_NAME = "parentWalletName";
     }
 
     public final class wallets implements BaseColumns {

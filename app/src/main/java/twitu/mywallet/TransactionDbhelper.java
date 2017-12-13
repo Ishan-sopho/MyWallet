@@ -9,10 +9,10 @@ import twitu.mywallet.transaction.walletTransaction;
  * Created by Ishan on 24-08-2017.
  */
 
-public class Dbhelper extends SQLiteOpenHelper {
+public class TransactionDbhelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "walletTransactions.db";
+    public static final String DATABASE_NAME = "transactions.db";
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + walletTransaction.TABLE_NAME + " (" +
@@ -20,13 +20,15 @@ public class Dbhelper extends SQLiteOpenHelper {
                     walletTransaction.COLUMN_TRANSACTION_TYPE + " TEXT," +
                     walletTransaction.COLUMN_TRANSACTION_AMOUNT + " TEXT," +
                     walletTransaction.COLUMN_TRANSACTION_TIME + " TEXT," +
+                    walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME + " TEXT," +
+                    walletTransaction.COLUMN_TRANSACTION_WALLET_NAME + " TEXT," +
                     walletTransaction.COLUMN_TRANSACTION_DESCRIPTION + " TEXT," +
                     walletTransaction.COLUMN_TRANSACTION_BALANCE + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE  " + walletTransaction.TABLE_NAME;
 
-    public Dbhelper(Context context) {
+    public TransactionDbhelper(Context context) {
         super(context,DATABASE_NAME,null,DATABASE_VERSION);
     }
 
