@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor flagEditor = flag.edit();
                     flagEditor.putString("lastRow", String.valueOf(newRowID));
                     flagEditor.apply();
-
+                    walletDb.close();
                     Log.d("TAG","Last row ID: "+flag.getString("lastRow",null));
 
                     Intent next = new Intent(MainActivity.this, wallet.class);

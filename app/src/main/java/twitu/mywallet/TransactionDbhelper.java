@@ -12,7 +12,7 @@ import twitu.mywallet.transaction.walletTransaction;
 public class TransactionDbhelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "transactions.db";
+    public static final String DATABASE_NAME = "moneyTransaction.db";
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + walletTransaction.TABLE_NAME + " (" +
