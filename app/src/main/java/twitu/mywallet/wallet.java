@@ -55,6 +55,7 @@ import java.util.TimeZone;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import twitu.mywallet.transaction.walletTransaction;
 
 public class wallet extends AppCompatActivity {
 
@@ -105,25 +106,25 @@ public class wallet extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 int current=0;
-                int transactionAmount=0;
+                int walletTransactionAmount=0;
                 try {
                     current= Integer.parseInt((String) display.getText());
-                    transactionAmount = Integer.parseInt(amount.getText().toString());
+                    walletTransactionAmount = Integer.parseInt(amount.getText().toString());
                 }catch(Exception e){
                     Toast.makeText(wallet.this, "Please put in valid input !", Toast.LENGTH_SHORT).show();
                     return ;
                 }
                 ContentValues newvalues = new ContentValues();
-                if (transactionAmount > current){
+                if (walletTransactionAmount > current){
                     Toast.makeText(wallet.this, "You do not have the required cash", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                newvalues.put(transaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(current - transactionAmount));
-                newvalues.put(transaction.COLUMN_TRANSACTION_DESCRIPTION, info.getText().toString());
-                newvalues.put(transaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
-                newvalues.put(transaction.COLUMN_TRANSACTION_TYPE, "pay");
-                newvalues.put(transaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(transactionAmount));
-                long newRowID = walletDb.insert(transaction.TABLE_NAME, null, newvalues);
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(current - walletTransactionAmount));
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, info.getText().toString());
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_TYPE, "pay");
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(walletTransactionAmount));
+                long newRowID = walletDb.insert(walletTransaction.TABLE_NAME, null, newvalues);
                 populateRecentsList();
                 Log.d("TAG", "new row id: " + newRowID);
                 flagEditor.putString("lastRow", String.valueOf(newRowID));
@@ -139,22 +140,22 @@ public class wallet extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 int current=0;
-                int transactionAmount=0;
+                int walletTransactionAmount=0;
                 try{
                     current = Integer.parseInt((String) display.getText());
-                    transactionAmount = Integer.parseInt(amount.getText().toString());
+                    walletTransactionAmount = Integer.parseInt(amount.getText().toString());
                 }catch(Exception e){
                     Toast.makeText(wallet.this, "Please put in valid input!", Toast.LENGTH_SHORT).show();
                     return ;
                 }
 
                 ContentValues newvalues = new ContentValues();
-                newvalues.put(transaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(current + transactionAmount));
-                newvalues.put(transaction.COLUMN_TRANSACTION_DESCRIPTION, info.getText().toString());
-                newvalues.put(transaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
-                newvalues.put(transaction.COLUMN_TRANSACTION_TYPE, "receive");
-                newvalues.put(transaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(transactionAmount));
-                long newRowID = walletDb.insert(transaction.TABLE_NAME, null, newvalues);
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(current + walletTransactionAmount));
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, info.getText().toString());
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
+                newvalues.put(walletTransaction.COLUMN_TRANSACTION_AMOUNT, String.valueOf(walletTransactionAmount));
+                long newRowID = walletDb.insert(walletTransaction.TABLE_NAME, null, newvalues);
                 populateRecentsList();
                 flagEditor.putString("lastRow", String.valueOf(newRowID));
                 flagEditor.apply();
@@ -169,11 +170,11 @@ public class wallet extends AppCompatActivity {
 
     private void populateRecentsList(){
         final SQLiteDatabase recentsDb=dbhelper.getReadableDatabase();
-        Cursor cursor1=recentsDb.rawQuery("SELECT * FROM moneyTransaction order by "+transaction._ID+" DESC limit 3",null);
+        Cursor cursor1=recentsDb.rawQuery("SELECT * FROM moneyTransaction order by "+walletTransaction._ID+" DESC limit 3",null);
         cursor1.moveToNext();
-        lastRowID= cursor1.getString(cursor1.getColumnIndexOrThrow(transaction._ID));
+        lastRowID= cursor1.getString(cursor1.getColumnIndexOrThrow(walletTransaction._ID));
         while(cursor1.isLast()){
-            Log.d("TAG","row id: "+cursor1.getString(cursor1.getColumnIndexOrThrow(transaction._ID)));
+            Log.d("TAG","row id: "+cursor1.getString(cursor1.getColumnIndexOrThrow(walletTransaction._ID)));
             cursor1.moveToNext();
         }
 
@@ -192,7 +193,7 @@ public class wallet extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, final long id) {
                 if(position==1) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(wallet.this);
-                    builder.setMessage("Do you want to remove this transaction ?");
+                    builder.setMessage("Do you want to remove this walletTransaction ?");
                     builder.setCancelable(false);
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
@@ -200,7 +201,7 @@ public class wallet extends AppCompatActivity {
                             String idToBeDeleted = String.valueOf(Integer.parseInt(lastRowID));
                             Log.d("TAG", "Row to be deleted: " + idToBeDeleted);
                             String tableName = "moneyTransaction";
-                            String whereClause = transaction._ID + "=?";
+                            String whereClause = walletTransaction._ID + "=?";
                             String[] whereArgs = new String[]{idToBeDeleted};
                             int deleteID = recentsDb.delete(tableName, whereClause, whereArgs);
                             Log.d("TAG", "Delete id= " + deleteID);
@@ -217,7 +218,7 @@ public class wallet extends AppCompatActivity {
                     builder.create().show();
 
                 }else if (position!=1){
-                    Toast.makeText(wallet.this, "Can only delete last transaction!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(wallet.this, "Can only delete last walletTransaction!", Toast.LENGTH_SHORT).show();
                 }
 
                 return false;
@@ -231,9 +232,9 @@ public class wallet extends AppCompatActivity {
     }
     private void updateDisplay(TextView display,long rowId) {
         SQLiteDatabase data = dbhelper.getReadableDatabase();
-        Cursor cursor=data.rawQuery("SELECT * FROM moneyTransaction WHERE "+transaction._ID+" = "+String.valueOf(rowId),null);
+        Cursor cursor=data.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction._ID+" = "+String.valueOf(rowId),null);
         cursor.moveToNext();
-        String currentBalance=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_BALANCE));
+        String currentBalance=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
         Log.d("TAG","Current Balance: "+currentBalance);
         display.setText(currentBalance);
     }
@@ -333,13 +334,13 @@ public class wallet extends AppCompatActivity {
         List<String[]> data=new ArrayList<String[]>();
         data.add(new String[]{"TimeStamp","Transaction type","Amount","Current Balance","Description"});
         while(cursor.moveToNext()){
-            String timeStamp=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TIME));
-            String transactionType=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TYPE));
-            String amount=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_AMOUNT));
-            String balance=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_BALANCE));
-            String description=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_DESCRIPTION));
+            String timeStamp=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TIME));
+            String walletTransactionType=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TYPE));
+            String amount=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_AMOUNT));
+            String balance=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
+            String description=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION));
 //            Log.d("TAG","Transaction detected !");
-            data.add(new String[]{convertTimeStampToDate(timeStamp),transactionType,amount,balance,description});
+            data.add(new String[]{convertTimeStampToDate(timeStamp),walletTransactionType,amount,balance,description});
         }
         if (writer != null) {
             writer.writeAll(data);

@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import twitu.mywallet.transaction.walletTransaction;
 
 /**
  * Created by Nishchay on 01-09-2017.
@@ -40,11 +41,11 @@ public class RecentTransactionsAdapter extends CursorAdapter {
         TextView descriptionTextView=(TextView)view.findViewById(R.id.descriptionTextView);
         TextView timeTextView=(TextView)view.findViewById(R.id.timeAdded);
 
-        String amount=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_AMOUNT));
-        String balance=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_BALANCE));
-        String description=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_DESCRIPTION));
-        String time=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TIME));
-        String transactionType=cursor.getString(cursor.getColumnIndexOrThrow(transaction.COLUMN_TRANSACTION_TYPE));
+        String amount=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_AMOUNT));
+        String balance=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
+        String description=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION));
+        String time=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TIME));
+        String transactionType=cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TYPE));
 
         if(transactionType.matches("pay")) {
             amountTextView.setText("Paid: Rs." + amount);

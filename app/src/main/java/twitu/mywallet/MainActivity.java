@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import twitu.mywallet.transaction.walletTransaction;
 
 public class MainActivity extends AppCompatActivity {
     SharedPreferences flag ;
@@ -38,13 +39,13 @@ public class MainActivity extends AppCompatActivity {
                     final SQLiteDatabase walletDb = dbhelper.getWritableDatabase();
 
                     final ContentValues values = new ContentValues();
-                    values.put(transaction.COLUMN_TRANSACTION_BALANCE, initial);
-                    values.put(transaction.COLUMN_TRANSACTION_DESCRIPTION, "Initialized wallet");
-                    values.put(transaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
-                    values.put(transaction.COLUMN_TRANSACTION_TYPE, "receive");
-                    values.put(transaction.COLUMN_TRANSACTION_AMOUNT, initial);
+                    values.put(walletTransaction.COLUMN_TRANSACTION_BALANCE, initial);
+                    values.put(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, "Initialized wallet");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
+                    values.put(walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_AMOUNT, initial);
                     Log.d("TAG", "value :" + values);
-                    long newRowID = walletDb.insert(transaction.TABLE_NAME, null, values);
+                    long newRowID = walletDb.insert(walletTransaction.TABLE_NAME, null, values);
                     Log.d("TAG", "new row id: " + newRowID);
                     SharedPreferences.Editor flagEditor = flag.edit();
                     flagEditor.putString("lastRow", String.valueOf(newRowID));
