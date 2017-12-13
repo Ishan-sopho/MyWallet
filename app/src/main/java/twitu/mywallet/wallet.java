@@ -71,6 +71,7 @@ public class wallet extends AppCompatActivity {
     private ListView listView;
 
     private Spinner walletsSpinner;
+    private TextView display ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,8 @@ public class wallet extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("MyWallet");
         setSupportActionBar(toolbar);
+
+        display = (TextView) findViewById(R.id.cash);
 
         listView = (ListView) findViewById(R.id.listView);
         View v = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.recent_transaction_view, null, false);
@@ -99,7 +102,7 @@ public class wallet extends AppCompatActivity {
         walletsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 spinnerOnItemClick(parent, view, position, id);
+                 spinnerOnItemClick(parent, view, position, id,display);
              }
 
              @Override
@@ -109,7 +112,7 @@ public class wallet extends AppCompatActivity {
          });
         Log.d("TAG", "spinner selected item: " + walletsSpinner.getSelectedItem());
         walletDb = transactionDbhelper.getWritableDatabase();
-        final TextView display = (TextView) findViewById(R.id.cash);
+
         Button pay = (Button) findViewById(R.id.pay);
         Button receive = (Button) findViewById(R.id.receive);
         final EditText info = (EditText) findViewById(R.id.info);
@@ -215,7 +218,7 @@ public class wallet extends AppCompatActivity {
 
     private void populateRecentsList() {
         final SQLiteDatabase recentsDb = transactionDbhelper.getReadableDatabase();
-        Cursor cursor1 = recentsDb.rawQuery("SELECT * FROM moneyTransaction order by " + walletTransaction._ID + " DESC limit 3", null);
+        Cursor cursor1 = recentsDb.rawQuery("SELECT * FROM moneyTransaction where walletName = '"+walletsSpinner.getSelectedItem().toString()+"' order by " + walletTransaction._ID + " DESC limit 3", null);
         cursor1.moveToNext();
         lastRowID = cursor1.getString(cursor1.getColumnIndexOrThrow(walletTransaction._ID));
         while (cursor1.isLast()) {
@@ -306,6 +309,11 @@ public class wallet extends AppCompatActivity {
             case R.id.deleteWallet:
                 deleteCurrentWallet();
                 return true;
+            case R.id.createWallet:
+                Intent intent = new Intent(wallet.this,CreateWallet.class);
+                intent.putExtra("currentBalance",display.getText().toString());
+                startActivity(intent);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -315,6 +323,7 @@ public class wallet extends AppCompatActivity {
 //        String dbpath=getDatabasePath("moneyTransaction.db").getPath();
 //        final SQLiteDatabase db=SQLiteDatabase.openDatabase(dbpath,null,Context.MODE_PRIVATE);
         final SQLiteDatabase db = transactionDbhelper.getWritableDatabase();
+        final SQLiteDatabase walletsDb = walletsDbHelper.getWritableDatabase();
         AlertDialog.Builder builder = new AlertDialog.Builder(wallet.this);
         builder.setMessage("Are you sure you want to delete this wallet ?");
         builder.setCancelable(false);
@@ -328,6 +337,7 @@ public class wallet extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 transactionDbhelper.delete(db);
+                walletsDbHelper.delete(walletsDb);
                 SharedPreferences.Editor editor = flag.edit();
                 editor.putString("walletInitialize", "False");
                 editor.apply();
@@ -370,8 +380,8 @@ public class wallet extends AppCompatActivity {
         Log.d("TAG", "Inside export to CSV");
         SQLiteDatabase db = transactionDbhelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * from moneyTransaction", null);
-        String rowID = flag.getString("lastRow", null);
-        int numberOfRows = Integer.valueOf(rowID);
+//        String rowID = flag.getString("lastRow", null);
+//        int numberOfRows = Integer.valueOf(rowID);
         String path = Environment.getExternalStorageDirectory() + "/Download/" + "wallet.csv";
         CSVWriter writer = null;
         try {
@@ -380,15 +390,17 @@ public class wallet extends AppCompatActivity {
             e.printStackTrace();
         }
         List<String[]> data = new ArrayList<String[]>();
-        data.add(new String[]{"TimeStamp", "Transaction type", "Amount", "Current Balance", "Description"});
+        data.add(new String[]{"TimeStamp", "Transaction type", "Amount", "Current Balance", "Description","walletName","ParentWalletName"});
         while (cursor.moveToNext()) {
             String timeStamp = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TIME));
             String walletTransactionType = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_TYPE));
             String amount = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_AMOUNT));
             String balance = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
             String description = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION));
+            String walletName =cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_WALLET_NAME));
+            String parentWalletName = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME));
 //            Log.d("TAG","Transaction detected !");
-            data.add(new String[]{convertTimeStampToDate(timeStamp), walletTransactionType, amount, balance, description});
+            data.add(new String[]{convertTimeStampToDate(timeStamp), walletTransactionType, amount, balance, description,walletName,parentWalletName});
         }
         if (writer != null) {
             writer.writeAll(data);
@@ -438,15 +450,24 @@ public class wallet extends AppCompatActivity {
         SQLiteDatabase walletsDb = walletsDbHelper.getReadableDatabase();
         Cursor cursor = walletsDb.rawQuery("SELECT * FROM " + transaction.wallets.TABLE_NAME, null);
         while (cursor.moveToNext()) {
-            walletsName.add(cursor.getString(cursor.getColumnIndexOrThrow(transaction.wallets.COLUMN_WALLET_PARENT_NAME)));
+            walletsName.add(cursor.getString(cursor.getColumnIndexOrThrow(transaction.wallets.COLUMN_WALLET_NAME)));
         }
         cursor.close();
         walletsDb.close();
         return walletsName;
     }
 
-    public void spinnerOnItemClick(AdapterView parent, View view, int position, long id) {
+    public void spinnerOnItemClick(AdapterView parent, View view, int position, long id,TextView display) {
+        long row=0;
+        Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction.COLUMN_TRANSACTION_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'"+" ORDER BY _id DESC LIMIT 1",null);
+        if(cursor.moveToNext()){
+            row= Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction._ID)));
+            Log.d("TAG","Last row id :"+row);
+        }
+        updateDisplay(display,row);
+        cursor.close();
 
+        populateRecentsList();
     }
 
 }
