@@ -509,7 +509,7 @@ public class wallet extends AppCompatActivity {
         walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues);
         Cursor cursor2 = walletsDb.rawQuery("SELECT * FROM "+transaction.wallets.TABLE_NAME+" WHERE "+transaction.wallets.COLUMN_WALLET_NAME+" = '"+parentWallet+"'",null);
         cursor2.moveToNext();
-        Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction.COLUMN_TRANSACTION_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'"+" ORDER BY _id DESC LIMIT 1",null);
+        Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction.COLUMN_TRANSACTION_WALLET_NAME+" = '"+parentWallet+"'"+" ORDER BY _id DESC LIMIT 1",null);
         cursor.moveToNext();
         Long currentMainBalance = Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE)));
 
