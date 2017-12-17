@@ -128,7 +128,7 @@ public class wallet extends AppCompatActivity {
             Log.d("TAG","Last row id :"+row);
         }
 //        Cursor cursor = transactionDb.rawQuery("SELECT TOP 1 * FROM moneyTransaction WHERE walletName = wallet ORDER BY "+walletTransaction._ID+" DESC",null);
-//        flag = getSharedPreferences("flag", Context.MODE_PRIVATE);
+        flag = getSharedPreferences("flag", Context.MODE_PRIVATE);
 //        SharedPreferences flag= PreferenceManager.getDefaultSharedPreferences(this);
 //        final SharedPreferences.Editor flagEditor = flag.edit();
 
@@ -312,7 +312,7 @@ public class wallet extends AppCompatActivity {
                 deleteCurrentWallet();
                 return true;
             case R.id.createWallet:
-                if(!walletsSpinner.getSelectedItem().toString().matches("Wallet")){
+                if(!walletsSpinner.getSelectedItem().toString().matches("MainWallet")){
                     Toast.makeText(this, "Can't create subwallet of this wallet currently", Toast.LENGTH_SHORT).show();
                 }
                 Intent intent = new Intent(wallet.this,CreateWallet.class);
@@ -329,7 +329,7 @@ public class wallet extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 //        menu.add(1,3,Menu.NONE,"Merge Wallet");
-        if(walletsSpinner.getSelectedItem().toString().matches("Wallet")){
+        if(walletsSpinner.getSelectedItem().toString().matches("MainWallet")){
             menu.getItem(3).setEnabled(false);
         }else{
             menu.getItem(3).setEnabled(true);
@@ -489,6 +489,12 @@ public class wallet extends AppCompatActivity {
     }
 
     public void mergeWallet(){
+        SQLiteDatabase walletsDb =walletsDbHelper.getWritableDatabase();
+        Cursor cursor1 = walletsDb.rawQuery("SELECT * FROM "+transaction.wallets.TABLE_NAME+" WHERE "+transaction.wallets.COLUMN_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'",null);
+        cursor1.moveToFirst();
+        String parentWallet =cursor1.getString(cursor1.getColumnIndexOrThrow(transaction.wallets.COLUMN_WALLET_PARENT_NAME));
+        Log.d("TAG","Parent wallet name: "+parentWallet);
+
         Long currentBalance= Long.parseLong(display.getText().toString());
         ContentValues newvalues = new ContentValues();
         newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_BALANCE, String.valueOf(0));
@@ -496,13 +502,16 @@ public class wallet extends AppCompatActivity {
         newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
         newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_TYPE, "pay");
         newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,walletsSpinner.getSelectedItem().toString());
-        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
+        newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,parentWallet);
         newvalues.put(transaction.walletTransaction.COLUMN_TRANSACTION_AMOUNT, display.getText().toString());
-        walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues);
+        cursor1.close();
 
+        walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues);
+        Cursor cursor2 = walletsDb.rawQuery("SELECT * FROM "+transaction.wallets.TABLE_NAME+" WHERE "+transaction.wallets.COLUMN_WALLET_NAME+" = '"+parentWallet+"'",null);
+        cursor2.moveToNext();
         Cursor cursor = walletDb.rawQuery("SELECT * FROM moneyTransaction WHERE "+walletTransaction.COLUMN_TRANSACTION_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'"+" ORDER BY _id DESC LIMIT 1",null);
         cursor.moveToNext();
-        String currentMainBalance = cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE));
+        Long currentMainBalance = Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow(walletTransaction.COLUMN_TRANSACTION_BALANCE)));
 
         cursor.close();
 
@@ -511,12 +520,11 @@ public class wallet extends AppCompatActivity {
         newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, "Received from "+walletsSpinner.getSelectedItem().toString());
         newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
         newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
-        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,"Wallet");
-        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,parentWallet);
+        newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,cursor2.getString(cursor2.getColumnIndexOrThrow(transaction.wallets.COLUMN_WALLET_PARENT_NAME)));
         newvalues1.put(transaction.walletTransaction.COLUMN_TRANSACTION_AMOUNT,currentBalance);
         walletDb.insert(transaction.walletTransaction.TABLE_NAME,null,newvalues1);
-
-        SQLiteDatabase walletsDb = walletsDbHelper.getWritableDatabase();
+        cursor2.close();
         walletsDb.delete(transaction.wallets.TABLE_NAME,transaction.wallets.COLUMN_WALLET_NAME+" = '"+walletsSpinner.getSelectedItem().toString()+"'",null);
         walletsDb.close();
 

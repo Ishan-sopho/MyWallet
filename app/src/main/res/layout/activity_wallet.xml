@@ -29,6 +29,7 @@
         <Spinner
             android:id="@+id/walletsNameSpinner"
             android:layout_width="0dp"
+            android:spinnerMode="dialog"
             android:layout_height="70dp"
             android:layout_weight="0.45"/>
 

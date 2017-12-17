@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     final String initial = balance.getText().toString();
                     ContentValues contentValues= new ContentValues();
-                    contentValues.put(wallets.COLUMN_WALLET_NAME,"Wallet");
-                    contentValues.put(wallets.COLUMN_WALLET_PARENT_NAME,"Wallet");
+                    contentValues.put(wallets.COLUMN_WALLET_NAME,"MainWallet");
+                    contentValues.put(wallets.COLUMN_WALLET_PARENT_NAME,"MainWallet");
                     long rowID=walletsDb.insertWithOnConflict(wallets.TABLE_NAME,null,contentValues,SQLiteDatabase.CONFLICT_ROLLBACK);
                     Log.d("TAG","new root wallet created with rowID: "+rowID);
                     walletsDb.close();
@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
                     values.put(walletTransaction.COLUMN_TRANSACTION_DESCRIPTION, "Initialized wallet");
                     values.put(walletTransaction.COLUMN_TRANSACTION_TIME, System.currentTimeMillis() / 1000);
                     values.put(walletTransaction.COLUMN_TRANSACTION_TYPE, "receive");
-                    values.put(walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"Wallet");
-                    values.put(walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,"Wallet");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_PARENT_WALLET_NAME,"MainWallet");
+                    values.put(walletTransaction.COLUMN_TRANSACTION_WALLET_NAME,"MainWallet");
                     values.put(walletTransaction.COLUMN_TRANSACTION_AMOUNT, initial);
                     Log.d("TAG", "value :" + values);
                     long newRowID = walletDb.insert(walletTransaction.TABLE_NAME, null, values);
